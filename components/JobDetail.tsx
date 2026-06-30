@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   MapPin,
   ArrowUpRight,
-  Sparkles,
+  PenLine,
   Loader2,
   Copy,
   Check,
@@ -180,7 +180,7 @@ export function JobDetail({
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" strokeWidth={1.75} />
+                  <PenLine className="h-4 w-4" strokeWidth={1.75} />
                   {cover ? "Regenerate" : "Generate cover letter"}
                 </>
               )}

@@ -7,6 +7,7 @@
 
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { seedPreferences, seedResume } from "./mock";
 import type {
   Job,
@@ -31,7 +32,8 @@ export interface DB {
   jobs_fetched_at: string | null;
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+const isVercel = !!process.env.VERCEL;
+const DATA_DIR = isVercel ? os.tmpdir() : path.join(process.cwd(), ".data");
 const DB_PATH = path.join(DATA_DIR, "db.json");
 
 function seedDB(): DB {

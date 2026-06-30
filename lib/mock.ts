@@ -119,12 +119,12 @@ function sample(
 }
 
 export const mockJobs: JobWithMatch[] = [
-  sample(0, "Senior Frontend Engineer", "Linear", "Remote", "USD 140k - 180k", 92, "new", ["React", "TypeScript", "Next.js", "Tailwind CSS"], ["Rust"], "Excellent fit — your frontend depth maps directly to this role."),
-  sample(1, "Frontend Design Engineer", "Vercel", "Remote", "USD 130k - 170k", 88, "new", ["Next.js", "React", "TypeScript", "Design Systems"], ["Go"], "Strong match; your Figma-to-code workflow is exactly what they want."),
-  sample(2, "Product Engineer", "Supabase", "Remote", "USD 120k - 160k", 81, "new", ["React", "TypeScript", "Supabase"], ["Elixir"], "Good match across the stack."),
-  sample(3, "React Developer", "Razorpay", "Bengaluru, India", "₹ 25L - 40L", 76, "new", ["React", "TypeScript", "REST APIs"], ["Payments domain"], "Solid match; domain ramp-up expected."),
-  sample(4, "UI Engineer", "Figma", "Remote", "USD 140k - 185k", 63, "new", ["React", "TypeScript"], ["WebGL", "Canvas internals"], "Partial match; rendering experience is the main gap."),
-  sample(5, "Frontend Engineer", "Zomato", "Bengaluru, India", "₹ 20L - 35L", 58, "new", ["React", "JavaScript"], ["Scale systems", "Java"], "Lower match; leans toward large-scale systems."),
+  sample(0, "Senior Frontend Engineer", "Linear", "Remote", "USD 140k - 180k", 92, "new", ["React", "TypeScript", "Next.js", "Tailwind CSS"], ["Rust"], "Frontend stack lines up almost one-to-one. Rust is listed but probably not a dealbreaker."),
+  sample(1, "Frontend Design Engineer", "Vercel", "Remote", "USD 130k - 170k", 88, "new", ["Next.js", "React", "TypeScript", "Design Systems"], ["Go"], "Design system experience is directly relevant. Go is backend — unlikely to be required day one."),
+  sample(2, "Product Engineer", "Supabase", "Remote", "USD 120k - 160k", 81, "new", ["React", "TypeScript", "Supabase"], ["Elixir"], "Good overlap on the frontend side. Elixir is their backend — would need to pick that up."),
+  sample(3, "React Developer", "Razorpay", "Bengaluru, India", "₹ 25L - 40L", 76, "new", ["React", "TypeScript", "REST APIs"], ["Payments domain"], "Tech stack matches. No payments experience but the core skills transfer."),
+  sample(4, "UI Engineer", "Figma", "Remote", "USD 140k - 185k", 63, "new", ["React", "TypeScript"], ["WebGL", "Canvas internals"], "React and TS check out but this role needs heavy canvas/rendering work."),
+  sample(5, "Frontend Engineer", "Zomato", "Bengaluru, India", "₹ 20L - 35L", 58, "new", ["React", "JavaScript"], ["Scale systems", "Java"], "Basic frontend skills match. Role skews toward large-scale infra they want Java for."),
 ];
 
 export function mockStats(): Stats {

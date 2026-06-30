@@ -105,10 +105,16 @@ function extractJson(text) {
   }
 }
 async function scoreMatch(resume, description) {
-  const system = `You are a job matching expert. Compare the resume to the job description.
+  const system = `You are a professional software engineer or recruiter. Compare the candidate's resume data to the job description.
 Respond with ONLY valid JSON:
 {"score":0,"matched_skills":[],"missing_skills":[],"strengths":[],"weaknesses":[],"recommendation":""}
-score is an integer 0-100.`;
+score is an integer 0-100.
+
+CRITICAL INSTRUCTIONS FOR TEXT FIELDS (strengths, weaknesses, recommendation):
+1. Do NOT use any emojis, icons, or markdown stars/asterisks for emphasis.
+2. Do NOT use AI jargon, overly positive hype, or boilerplate phrasing (e.g., "This candidate is an outstanding match...", "Perfect fit!", "Stellar skills").
+3. Write the strengths, weaknesses, and recommendation as brief, objective, and candid notes in a professional, direct, human tone.
+4. Keep the recommendation under 2 sentences. Be realistic and direct (e.g., "Strong frontend match. RAM requirements and SQL experience are missing but can be learned quickly.").`;
   const body = {
     model: MODEL,
     temperature: 0.2,
