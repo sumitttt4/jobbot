@@ -92,6 +92,65 @@ async function searchJobs(query) {
   }));
 }
 
+function mapAtsJob(job) {
+  const company = typeof job.organization === "object"
+    ? job.organization.name
+    : job.organization || "Unknown Company";
+    
+  let locationStr = "Remote";
+  if (Array.isArray(job.locations)) {
+    locationStr = job.locations.map((l) => typeof l === "object" ? l.text : l).join(", ");
+  } else if (job.locations) {
+    locationStr = String(job.locations);
+  }
+
+  return {
+    job_id: job.id || `ats-${Math.random().toString(36).substring(2, 11)}`,
+    title: job.title || "Untitled Internship",
+    company,
+    location: locationStr || "Remote",
+    salary: job.salary || "Not disclosed",
+    description: job.description || "",
+    job_url: job.url || "",
+    source: "internships-api",
+    posted_date: job.posted_at || new Date().toISOString(),
+  };
+}
+
+async function fetchInternships(query) {
+  const apiKey = process.env.INTERNSHIPS_API_KEY || JSEARCH_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const params = new URLSearchParams({
+      description_format: "text",
+      limit: "15",
+      query,
+    });
+
+    const res = await fetch(`https://internships-api.p.rapidapi.com/active-ats-7d?${params.toString()}`, {
+      headers: {
+        "x-rapidapi-key": apiKey,
+        "x-rapidapi-host": "internships-api.p.rapidapi.com",
+      },
+    });
+
+    if (!res.ok) {
+      log(`[Warning] Internships API failed: ${res.status}`);
+      return [];
+    }
+
+    const data = await res.json();
+    const rows = Array.isArray(data) ? data : data.data || [];
+    
+    return rows.map(mapAtsJob);
+  } catch (err) {
+    log(`[Error] fetchInternships failed: ${err.message}`);
+    return [];
+  }
+}
+
+
 // ── Groq scoring (mirror of lib/groq.ts scoreMatch) ──────────────────────
 function extractJson(text) {
   const cleaned = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
@@ -178,12 +237,15 @@ async function main() {
   log(`Searching: "${query}"`);
   let fetched = [];
   try {
-    // Mirroring query page 1 search
-    fetched = await searchJobs(query);
+    const [fetchedJobs, fetchedInternships] = await Promise.all([
+      searchJobs(query),
+      fetchInternships("frontend"),
+    ]);
+    fetched = [...fetchedJobs, ...fetchedInternships];
   } catch (e) {
     return log("Search failed:", e.message);
   }
-  log(`JSearch returned ${fetched.length} jobs.`);
+  log(`Fetched ${fetched.length} total jobs/internships.`);
 
   // Upsert (dedupe by job_id, id = job_id), seed match rows as "new".
   let added = 0;

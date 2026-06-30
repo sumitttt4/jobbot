@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchJobs, buildScraperQuery } from "@/lib/jsearch";
+import { searchJobs, buildScraperQuery, fetchInternships } from "@/lib/jsearch";
 import { scoreMatch } from "@/lib/groq";
 import {
   getPreferences,
@@ -38,10 +38,14 @@ export async function GET() {
   if (!isCacheFresh()) {
     try {
       const query = buildScraperQuery(prefs);
-      const fetched = await searchJobs(query, { page: 1, numPages: 2 });
-      if (fetched.length) upsertJobs(fetched);
+      const [fetchedJobs, fetchedInternships] = await Promise.all([
+        searchJobs(query, { page: 1, numPages: 2 }),
+        fetchInternships("frontend"),
+      ]);
+      const combined = [...fetchedJobs, ...fetchedInternships];
+      if (combined.length) upsertJobs(combined);
     } catch (err) {
-      console.error("JSearch failed:", (err as Error).message);
+      console.error("Scraper fetch failed:", (err as Error).message);
     }
   }
 

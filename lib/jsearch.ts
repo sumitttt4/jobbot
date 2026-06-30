@@ -117,3 +117,62 @@ export async function searchJobs(
       posted_date: j.job_posted_at_datetime_utc ?? null,
     }));
 }
+
+function mapAtsJob(job: any): Omit<Job, "id" | "created_at"> {
+  const company = typeof job.organization === "object"
+    ? job.organization.name
+    : job.organization || "Unknown Company";
+    
+  let locationStr = "Remote";
+  if (Array.isArray(job.locations)) {
+    locationStr = job.locations.map((l: any) => typeof l === "object" ? l.text : l).join(", ");
+  } else if (job.locations) {
+    locationStr = String(job.locations);
+  }
+
+  return {
+    job_id: job.id || `ats-${Math.random().toString(36).substring(2, 11)}`,
+    title: job.title || "Untitled Internship",
+    company,
+    location: locationStr || "Remote",
+    salary: job.salary || "Not disclosed",
+    description: job.description || "",
+    job_url: job.url || "",
+    source: "internships-api",
+    posted_date: job.posted_at || new Date().toISOString(),
+  };
+}
+
+export async function fetchInternships(query: string): Promise<Omit<Job, "id" | "created_at">[]> {
+  const apiKey = process.env.INTERNSHIPS_API_KEY || process.env.JSEARCH_API_KEY;
+  if (!apiKey) return [];
+
+  try {
+    const params = new URLSearchParams({
+      description_format: "text",
+      limit: "15",
+      query,
+    });
+
+    const res = await fetch(`https://internships-api.p.rapidapi.com/active-ats-7d?${params.toString()}`, {
+      headers: {
+        "x-rapidapi-key": apiKey,
+        "x-rapidapi-host": "internships-api.p.rapidapi.com",
+      },
+    });
+
+    if (!res.ok) {
+      console.warn("Internships API request failed:", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    const rows = Array.isArray(data) ? data : data.data || [];
+    
+    return rows.map(mapAtsJob);
+  } catch (err) {
+    console.error("fetchInternships failed:", err);
+    return [];
+  }
+}
+
