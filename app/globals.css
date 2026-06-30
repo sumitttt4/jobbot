@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #ffffff;
+  --ink: #0a0a0a;
+  --muted: #737373;
+  --line: #e5e5e5;
+  --accent: #2563eb;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tabular figures for scores/stats so numbers don't jitter. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Small uppercase section label. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  ::selection {
+    background: #2563eb;
+    color: #fff;
+  }
+}
