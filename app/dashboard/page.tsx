@@ -1,6 +1,6 @@
 import { Briefcase } from "lucide-react";
 import { Nav } from "@/components/Nav";
-import { JobCard } from "@/components/JobCard";
+import { DashboardJobsList } from "@/components/DashboardJobsList";
 import { SearchButton } from "@/components/SearchButton";
 import { getJobsWithMatches, getResume, getStats } from "@/lib/data";
 
@@ -65,11 +65,7 @@ export default function DashboardPage() {
         </div>
 
         {jobs.length ? (
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
-          </div>
+          <DashboardJobsList initialJobs={jobs} />
         ) : (
           <div className="mt-3 flex flex-col items-center gap-3 rounded-lg border border-dashed border-line py-16 text-center">
             <Briefcase className="h-7 w-7 text-faint" strokeWidth={1.5} />

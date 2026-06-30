@@ -143,6 +143,23 @@ CRITICAL INSTRUCTIONS FOR TEXT FIELDS (strengths, weaknesses, recommendation):
   };
 }
 
+function buildScraperQuery(prefs) {
+  const roles = prefs?.preferred_roles?.length 
+    ? prefs.preferred_roles 
+    : ["Frontend Engineer", "Design Engineer", "UI Engineer", "React Developer"];
+    
+  const locations = prefs?.preferred_locations?.length
+    ? prefs.preferred_locations
+    : ["Remote"];
+
+  const rolePart = `(${roles.map((r) => `"${r}"`).join(" OR ")})`;
+  const expPart = `("junior" OR "entry level" OR "0-2 years" OR "associate" OR "mid level")`;
+  const platformPart = `(linkedin OR wellfound OR "work at a startup" OR "y combinator")`;
+  const locationPart = `in ${locations.join(" OR ")}`;
+
+  return `${rolePart} ${expPart} ${platformPart} ${locationPart}`;
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────
 async function main() {
   if (!fs.existsSync(DB_PATH)) {
@@ -156,13 +173,12 @@ async function main() {
   const prefs = db.preferences || {};
   if (!resume) return log("No resume in db — open the app and confirm your resume first.");
 
-  const roles = prefs.preferred_roles?.length ? prefs.preferred_roles : ["Frontend Engineer"];
-  const loc = prefs.preferred_locations?.[0] || "Remote";
-  const query = `${roles[0]} in ${loc}`;
+  const query = buildScraperQuery(prefs);
 
   log(`Searching: "${query}"`);
   let fetched = [];
   try {
+    // Mirroring query page 1 search
     fetched = await searchJobs(query);
   } catch (e) {
     return log("Search failed:", e.message);

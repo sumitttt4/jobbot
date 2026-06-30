@@ -8,6 +8,23 @@ import type { Job } from "./types";
 const HOST = process.env.JSEARCH_API_HOST ?? "jsearch.p.rapidapi.com";
 const SEARCH_PATH = process.env.JSEARCH_SEARCH_PATH ?? "search-v2";
 
+export function buildScraperQuery(prefs: any): string {
+  const roles = prefs?.preferred_roles?.length 
+    ? prefs.preferred_roles 
+    : ["Frontend Engineer", "Design Engineer", "UI Engineer", "React Developer"];
+    
+  const locations = prefs?.preferred_locations?.length
+    ? prefs.preferred_locations
+    : ["Remote"];
+
+  const rolePart = `(${roles.map((r: string) => `"${r}"`).join(" OR ")})`;
+  const expPart = `("junior" OR "entry level" OR "0-2 years" OR "associate" OR "mid level")`;
+  const platformPart = `(linkedin OR wellfound OR "work at a startup" OR "y combinator")`;
+  const locationPart = `in ${locations.join(" OR ")}`;
+
+  return `${rolePart} ${expPart} ${platformPart} ${locationPart}`;
+}
+
 export interface NormalizedJob extends Omit<Job, "id" | "created_at"> {}
 
 interface JSearchJob {

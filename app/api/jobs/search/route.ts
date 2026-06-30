@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchJobs } from "@/lib/jsearch";
+import { searchJobs, buildScraperQuery } from "@/lib/jsearch";
 import { scoreMatch } from "@/lib/groq";
 import {
   getPreferences,
@@ -33,13 +33,12 @@ export async function GET() {
 
   const prefs = getPreferences();
   const resume = getResume();
-  const role = prefs?.preferred_roles?.[0] ?? "Frontend Developer";
-  const location = prefs?.preferred_locations?.[0] ?? "Remote";
 
   // 24h cache — skip the (rate-limited) JSearch call if we fetched recently.
   if (!isCacheFresh()) {
     try {
-      const fetched = await searchJobs(`${role} in ${location}`, { page: 1, numPages: 1 });
+      const query = buildScraperQuery(prefs);
+      const fetched = await searchJobs(query, { page: 1, numPages: 2 });
       if (fetched.length) upsertJobs(fetched);
     } catch (err) {
       console.error("JSearch failed:", (err as Error).message);

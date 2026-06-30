@@ -29,6 +29,25 @@ export function JobCard({ job }: { job: JobWithMatch }) {
       </div>
       <p className="mt-1 tnum text-sm text-ink">{formatSalary(job.salary)}</p>
 
+      {/* Render missing skills so the user can easily see what to add to their resume */}
+      {job.match?.match_skills?.missing_skills && job.match.match_skills.missing_skills.length > 0 && (
+        <div className="mt-3.5">
+          <span className="text-[10px] font-semibold text-muted uppercase tracking-wider block mb-1">Missing Skills</span>
+          <div className="flex flex-wrap gap-1">
+            {job.match.match_skills.missing_skills.slice(0, 3).map((sk) => (
+              <span key={sk} className="rounded bg-red-50/70 border border-red-100/50 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
+                {sk}
+              </span>
+            ))}
+            {job.match.match_skills.missing_skills.length > 3 && (
+              <span className="text-[10px] text-muted self-center ml-0.5">
+                +{job.match.match_skills.missing_skills.length - 3} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
         <span
           className={cn(
