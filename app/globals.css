@@ -16,8 +16,12 @@
     text-rendering: optimizeLegibility;
   }
 
+  html {
+    background-color: var(--bg); /* white fallback behind the ambient layer */
+  }
+
   body {
-    background-color: var(--bg);
+    background-color: transparent; /* let the fixed sky layer show through */
     color: var(--ink);
     font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";

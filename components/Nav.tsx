@@ -15,7 +15,7 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-white">
+    <header className="sticky top-0 z-10 border-b border-line bg-white/70 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
         <Link href="/dashboard" className="flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ink text-[13px] font-bold text-white">
