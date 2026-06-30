@@ -8,8 +8,8 @@ import { hasGroq, hasSmtp } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-export default function JobPage({ params }: { params: { id: string } }) {
-  const job = getJobWithMatch(params.id);
+export default async function JobPage({ params }: { params: { id: string } }) {
+  const job = await getJobWithMatch(params.id);
   if (!job) notFound();
 
   return (

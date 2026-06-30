@@ -1,5 +1,5 @@
 // High-level data accessors for the personal app. Single user, no auth —
-// everything is backed by the local file store (lib/store.ts).
+// everything is backed by the local file store or Vercel KV (lib/store.ts).
 
 import { readDB, updateDB, type StoredMatch } from "./store";
 import { hasJSearch } from "./config";
@@ -10,28 +10,29 @@ import type {
   JobStatus,
   JobWithMatch,
   MatchSkills,
-  ParsedResume,
   Stats,
 } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export function getResume(): ParsedResume | null {
-  return readDB().resume;
+export async function getResume(): Promise<ParsedResume | null> {
+  const db = await readDB();
+  return db.resume;
 }
 
-export function saveResume(resume: ParsedResume): void {
-  updateDB((db) => {
+export async function saveResume(resume: ParsedResume): Promise<void> {
+  await updateDB((db) => {
     db.resume = resume;
   });
 }
 
-export function getPreferences(): JobPreferences | null {
-  return readDB().preferences;
+export async function getPreferences(): Promise<JobPreferences | null> {
+  const db = await readDB();
+  return db.preferences;
 }
 
-export function savePreferences(prefs: JobPreferences): void {
-  updateDB((db) => {
+export async function savePreferences(prefs: JobPreferences): Promise<void> {
+  await updateDB((db) => {
     db.preferences = prefs;
   });
 }
@@ -54,8 +55,8 @@ function withMatch(job: Job, match?: StoredMatch): JobWithMatch {
 }
 
 /** All stored jobs joined with their match, sorted by score desc. */
-export function getJobsWithMatches(opts: { status?: JobStatus } = {}): JobWithMatch[] {
-  const db = readDB();
+export async function getJobsWithMatches(opts: { status?: JobStatus } = {}): Promise<JobWithMatch[]> {
+  const db = await readDB();
 
   // Fallback: no JSearch key and nothing stored yet → show sample jobs so the
   // dashboard isn't empty.
@@ -70,8 +71,8 @@ export function getJobsWithMatches(opts: { status?: JobStatus } = {}): JobWithMa
   );
 }
 
-export function getJobWithMatch(id: string): JobWithMatch | null {
-  const db = readDB();
+export async function getJobWithMatch(id: string): Promise<JobWithMatch | null> {
+  const db = await readDB();
   const job = db.jobs.find((j) => j.id === id);
   if (job) return withMatch(job, db.matches[job.id]);
   // Fallback to a sample job if we're showing samples.
@@ -80,8 +81,8 @@ export function getJobWithMatch(id: string): JobWithMatch | null {
 }
 
 /** Add fetched jobs, de-duped by job_id, preserving existing matches. */
-export function upsertJobs(jobs: Omit<Job, "id" | "created_at">[]): Job[] {
-  return updateDB((db) => {
+export async function upsertJobs(jobs: Omit<Job, "id" | "created_at">[]): Promise<Job[]> {
+  const db = await updateDB((db) => {
     for (const incoming of jobs) {
       const exists = db.jobs.find((j) => j.job_id === incoming.job_id);
       if (exists) continue;
@@ -103,11 +104,12 @@ export function upsertJobs(jobs: Omit<Job, "id" | "created_at">[]): Job[] {
       }
     }
     db.jobs_fetched_at = new Date().toISOString();
-  }).jobs;
+  });
+  return db.jobs;
 }
 
-export function setMatchScore(jobId: string, score: number, skills: MatchSkills): void {
-  updateDB((db) => {
+export async function setMatchScore(jobId: string, score: number, skills: MatchSkills): Promise<void> {
+  await updateDB((db) => {
     const m = db.matches[jobId] ?? {
       match_score: null,
       match_skills: null,
@@ -124,9 +126,9 @@ export function setMatchScore(jobId: string, score: number, skills: MatchSkills)
 
 const APPLIED_STATUSES: JobStatus[] = ["applied", "replied", "interviewing", "offer", "no_reply", "ghosted"];
 
-export function setStatus(jobId: string, status: JobStatus): boolean {
+export async function setStatus(jobId: string, status: JobStatus): Promise<boolean> {
   let ok = false;
-  updateDB((db) => {
+  await updateDB((db) => {
     if (db.matches[jobId]) {
       db.matches[jobId].status = status;
       // Auto-set applied_at when moving to an applied state for the first time
@@ -139,9 +141,9 @@ export function setStatus(jobId: string, status: JobStatus): boolean {
   return ok;
 }
 
-export function setNotes(jobId: string, notes: string): boolean {
+export async function setNotes(jobId: string, notes: string): Promise<boolean> {
   let ok = false;
-  updateDB((db) => {
+  await updateDB((db) => {
     if (db.matches[jobId]) {
       db.matches[jobId].notes = notes;
       ok = true;
@@ -150,29 +152,29 @@ export function setNotes(jobId: string, notes: string): boolean {
   return ok;
 }
 
-export function setCoverLetter(jobId: string, cover: string): void {
-  updateDB((db) => {
+export async function setCoverLetter(jobId: string, cover: string): Promise<void> {
+  await updateDB((db) => {
     if (db.matches[jobId]) db.matches[jobId].cover_letter = cover;
   });
 }
 
 /** Jobs that still need an AI match score. */
-export function getUnscoredJobs(limit: number): Job[] {
-  const db = readDB();
+export async function getUnscoredJobs(limit: number): Promise<Job[]> {
+  const db = await readDB();
   return db.jobs
     .filter((j) => db.matches[j.id]?.match_score == null && j.description)
     .slice(0, limit);
 }
 
-export function isCacheFresh(): boolean {
-  const db = readDB();
+export async function isCacheFresh(): Promise<boolean> {
+  const db = await readDB();
   if (db.jobs.length === 0) return false;
   const at = db.jobs_fetched_at;
   return !!at && Date.now() - new Date(at).getTime() < DAY_MS;
 }
 
-export function getStats(): Stats {
-  const db = readDB();
+export async function getStats(): Promise<Stats> {
+  const db = await readDB();
 
   if (!hasJSearch && db.jobs.length === 0) return mockStats();
 
@@ -187,3 +189,6 @@ export function getStats(): Stats {
 
   return { total_jobs_found: total, applied_count: applied, saved_count: saved, match_rate: matchRate };
 }
+
+// Helper types imported for ts signature completeness
+type ParsedResume = import("./types").ParsedResume;

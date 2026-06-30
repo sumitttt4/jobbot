@@ -37,10 +37,10 @@ export async function PATCH(
 
   let ok = true;
   if (body.status) {
-    ok = setStatus(params.id, body.status);
+    ok = await setStatus(params.id, body.status);
   }
   if (ok && body.notes !== undefined) {
-    ok = setNotes(params.id, body.notes);
+    ok = await setNotes(params.id, body.notes);
   }
 
   if (!ok) return NextResponse.json({ error: "Job not found" }, { status: 404 });

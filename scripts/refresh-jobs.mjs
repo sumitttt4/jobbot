@@ -37,17 +37,74 @@ const GROQ_KEY = process.env.GROQ_API_KEY;
 
 const log = (...a) => console.log(`[${new Date().toLocaleTimeString()}]`, ...a);
 
+const KV_URL = process.env.KV_REST_API_URL;
+const KV_TOKEN = process.env.KV_REST_API_TOKEN;
+const hasKV = !!(KV_URL && KV_TOKEN);
+
 // ── DB helpers ───────────────────────────────────────────────────────────
-function readDB() {
-  const raw = fs.readFileSync(DB_PATH, "utf8");
-  const db = JSON.parse(raw);
-  db.jobs ??= [];
-  db.matches ??= {};
-  return db;
+async function readDB() {
+  if (hasKV) {
+    try {
+      const url = `${KV_URL}/get/db`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.result) {
+          const db = JSON.parse(json.result);
+          db.jobs ??= [];
+          db.matches ??= {};
+          return db;
+        }
+      }
+    } catch (e) {
+      log("KV read failed, falling back to local file:", e.message);
+    }
+  }
+
+  try {
+    const raw = fs.readFileSync(DB_PATH, "utf8");
+    const db = JSON.parse(raw);
+    db.jobs ??= [];
+    db.matches ??= {};
+    return db;
+  } catch (e) {
+    return {
+      resume: null,
+      preferences: null,
+      jobs: [],
+      matches: {},
+      jobs_fetched_at: null,
+    };
+  }
 }
-function writeDB(db) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf8");
+
+async function writeDB(db) {
+  if (hasKV) {
+    try {
+      const res = await fetch(KV_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${KV_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(["SET", "db", JSON.stringify(db)]),
+      });
+      if (res.ok) return;
+      log("KV write response not OK:", res.status);
+    } catch (e) {
+      log("KV write failed:", e.message);
+    }
+  }
+
+  try {
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf8");
+  } catch (e) {
+    log("Local file write failed:", e.message);
+  }
 }
 
 // ── JSearch (mirror of lib/jsearch.ts) ───────────────────────────────────
@@ -221,13 +278,13 @@ function buildScraperQuery(prefs) {
 
 // ── Main ─────────────────────────────────────────────────────────────────
 async function main() {
-  if (!fs.existsSync(DB_PATH)) {
+  if (!hasKV && !fs.existsSync(DB_PATH)) {
     log("No .data/db.json yet — open the app once first to seed it. Skipping.");
     return;
   }
   if (!JSEARCH_KEY) return log("Missing JSEARCH_API_KEY in .env.local — skipping.");
 
-  const db = readDB();
+  const db = await readDB();
   const resume = db.resume;
   const prefs = db.preferences || {};
   if (!resume) return log("No resume in db — open the app and confirm your resume first.");
@@ -286,7 +343,7 @@ async function main() {
     log("No GROQ_API_KEY — jobs fetched but not scored.");
   }
 
-  writeDB(db);
+  await writeDB(db);
   log(`Done. Total stored jobs: ${db.jobs.length}.`);
 }
 

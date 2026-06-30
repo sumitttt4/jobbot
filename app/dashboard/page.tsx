@@ -22,10 +22,12 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-export default function DashboardPage() {
-  const resume = getResume();
-  const jobs = getJobsWithMatches();
-  const stats = getStats();
+export default async function DashboardPage() {
+  const [resume, jobs, stats] = await Promise.all([
+    getResume(),
+    getJobsWithMatches(),
+    getStats(),
+  ]);
   const name = resume?.name?.split(" ")[0] ?? "there";
 
   return (

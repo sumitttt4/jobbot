@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   try {
     const parsedData = await parseResume(rawText);
-    saveResume(parsedData);
+    await saveResume(parsedData);
     return NextResponse.json(parsedData);
   } catch (err) {
     return NextResponse.json(

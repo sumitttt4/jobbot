@@ -15,7 +15,7 @@ export async function savePreferences(formData: FormData) {
   const minSalary = Number(formData.get("min_salary"));
   const maxSalary = Number(formData.get("max_salary"));
 
-  persist({
+  await persist({
     preferred_roles: splitCsv(formData.get("preferred_roles")),
     preferred_locations: splitCsv(formData.get("preferred_locations")),
     min_salary: Number.isFinite(minSalary) && minSalary > 0 ? minSalary : null,

@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 const JOB_TYPES = ["full-time", "contract", "freelance", "part-time"];
 const LEVELS = ["entry", "mid", "senior"] as const;
 
-export default function PreferencesPage() {
-  const prefs = getPreferences();
+export default async function PreferencesPage() {
+  const prefs = await getPreferences();
 
   return (
     <>

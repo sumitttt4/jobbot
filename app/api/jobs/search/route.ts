@@ -26,16 +26,16 @@ const MAX_TO_SCORE = 10;
 export async function GET() {
   if (!hasJSearch) {
     return NextResponse.json(
-      { error: "Add a JSEARCH_API_KEY to .env.local to fetch real jobs.", jobs: getJobsWithMatches() },
+      { error: "Add a JSEARCH_API_KEY to .env.local to fetch real jobs.", jobs: await getJobsWithMatches() },
       { status: 400 }
     );
   }
 
-  const prefs = getPreferences();
-  const resume = getResume();
+  const prefs = await getPreferences();
+  const resume = await getResume();
 
   // 24h cache — skip the (rate-limited) JSearch call if we fetched recently.
-  if (!isCacheFresh()) {
+  if (!(await isCacheFresh())) {
     try {
       const query = buildScraperQuery(prefs);
       const [fetchedJobs, fetchedInternships] = await Promise.all([
@@ -43,7 +43,7 @@ export async function GET() {
         fetchInternships("frontend"),
       ]);
       const combined = [...fetchedJobs, ...fetchedInternships];
-      if (combined.length) upsertJobs(combined);
+      if (combined.length) await upsertJobs(combined);
     } catch (err) {
       console.error("Scraper fetch failed:", err);
       return NextResponse.json(
@@ -55,10 +55,11 @@ export async function GET() {
 
   // Score unscored jobs with Groq (bounded).
   if (hasGroq && resume) {
-    for (const job of getUnscoredJobs(MAX_TO_SCORE)) {
+    const unscored = await getUnscoredJobs(MAX_TO_SCORE);
+    for (const job of unscored) {
       try {
         const r = await scoreMatch(resume, job.description);
-        setMatchScore(job.id, r.score, {
+        await setMatchScore(job.id, r.score, {
           matched_skills: r.matched_skills,
           missing_skills: r.missing_skills,
           strengths: r.strengths,
@@ -71,6 +72,6 @@ export async function GET() {
     }
   }
 
-  const jobs = getJobsWithMatches();
+  const jobs = await getJobsWithMatches();
   return NextResponse.json({ count: jobs.length, scored: hasGroq, jobs });
 }

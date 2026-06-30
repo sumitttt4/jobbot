@@ -23,17 +23,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing job_id" }, { status: 400 });
   }
 
-  const resume = getResume();
+  const resume = await getResume();
   if (!resume) return NextResponse.json({ error: "No resume found" }, { status: 400 });
 
-  const job = getJobWithMatch(body.job_id);
+  const job = await getJobWithMatch(body.job_id);
   if (!job?.description) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
   try {
     const cover = await generateCoverLetter(resume, job.description, job.company);
-    setCoverLetter(body.job_id, cover);
+    await setCoverLetter(body.job_id, cover);
     return NextResponse.json({ cover_letter: cover });
   } catch (err) {
     return NextResponse.json(

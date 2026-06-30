@@ -6,8 +6,8 @@ import { hasGroq } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const resume = getResume();
+export default async function Home() {
+  const resume = await getResume();
 
   return (
     <>

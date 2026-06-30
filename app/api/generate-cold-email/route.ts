@@ -23,10 +23,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing job_id" }, { status: 400 });
   }
 
-  const resume = getResume();
+  const resume = await getResume();
   if (!resume) return NextResponse.json({ error: "No resume found" }, { status: 400 });
 
-  const job = getJobWithMatch(body.job_id);
+  const job = await getJobWithMatch(body.job_id);
   if (!job?.description) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }

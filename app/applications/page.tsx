@@ -4,8 +4,8 @@ import { getJobsWithMatches } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
-export default function ApplicationsPage() {
-  const jobs = getJobsWithMatches();
+export default async function ApplicationsPage() {
+  const jobs = await getJobsWithMatches();
 
   // Count jobs in each stage for the summary bar
   const applied = jobs.filter((j) => j.match?.status === "applied").length;
