@@ -45,7 +45,11 @@ export async function GET() {
       const combined = [...fetchedJobs, ...fetchedInternships];
       if (combined.length) upsertJobs(combined);
     } catch (err) {
-      console.error("Scraper fetch failed:", (err as Error).message);
+      console.error("Scraper fetch failed:", err);
+      return NextResponse.json(
+        { error: `Scraper failed: ${(err as Error).message}` },
+        { status: 500 }
+      );
     }
   }
 

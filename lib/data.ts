@@ -165,7 +165,9 @@ export function getUnscoredJobs(limit: number): Job[] {
 }
 
 export function isCacheFresh(): boolean {
-  const at = readDB().jobs_fetched_at;
+  const db = readDB();
+  if (db.jobs.length === 0) return false;
+  const at = db.jobs_fetched_at;
   return !!at && Date.now() - new Date(at).getTime() < DAY_MS;
 }
 
