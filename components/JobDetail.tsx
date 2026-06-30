@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { MatchScore } from "@/components/MatchScore";
 import { formatSalary } from "@/lib/utils";
 import type { JobStatus, JobWithMatch, MatchSkills } from "@/lib/types";
+import { ColdEmailSection } from "./ColdEmailSection";
 
 const STATUSES: JobStatus[] = [
   "new", "viewed", "saved", "applied", "replied",
@@ -37,9 +38,11 @@ function SkillChip({ accent, children }: { accent?: boolean; children: string })
 export function JobDetail({
   job,
   canGenerate = true,
+  canSend = false,
 }: {
   job: JobWithMatch;
   canGenerate?: boolean;
+  canSend?: boolean;
 }) {
   const m = job.match;
   const skills = (m?.match_skills ?? null) as
@@ -195,6 +198,14 @@ export function JobDetail({
             )}
           </CardBody>
         </Card>
+
+        <ColdEmailSection
+          jobId={job.id}
+          companyName={job.company}
+          canGenerate={canGenerate}
+          canSend={canSend}
+          onStatusUpdate={updateStatus}
+        />
       </div>
 
       {/* Sidebar: match breakdown */}

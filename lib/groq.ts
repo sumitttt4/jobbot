@@ -123,3 +123,38 @@ ${jobDescription}`;
   return (await complete(system, user, { temperature: 0.7, maxTokens: 500 })).trim();
 }
 
+// ─── Prompt 4: Generate cold email ────────────────────────────────────────
+export async function generateColdEmail(
+  resume: ParsedResume,
+  jobDescription: string,
+  companyName: string
+): Promise<{ subject: string; body: string }> {
+  const system = `You are writing a cold email to the founder or hiring manager of a company.
+Write an extremely concise, high-conversion cold email (around 80-100 words).
+
+CRITICAL STYLE RULES:
+1. No exclamation marks, no emojis.
+2. No greetings like "Dear hiring manager" or generic introductions like "I am writing to express my interest". Keep the greeting short (e.g., "Hi [Name],").
+3. Do NOT use any banned AI words: "passionate", "passion", "thrilled", "excited", "stellar", "synergy", "leverage", "thrive", "hit the ground running", "fast-paced", "proven track record".
+4. Open directly with a reference to their product/recent news or a specific challenge they face.
+5. Ground the text in 1-2 hard technical details/achievements from the resume (e.g. "I shipped a design system in React/TS at Metry AI").
+6. Suggest a specific next step (e.g., "Do you have 5 minutes for a quick chat next week?").
+7. Do not sign off with long boilerplate (just "Best, [Your Name]").
+
+Respond with ONLY valid JSON:
+{"subject": "Direct & human subject line", "body": "Hi [Name],\\n\\n...body...\\n\\nBest,\\n[Your Name]"}
+
+EXAMPLE:
+{"subject": "Next.js engineer for Supabase", "body": "Hi Paul,\\n\\nSaw Supabase is expanding database UI features. At glyph, I built custom dashboard widgets with React and Supabase. Also shipped Next.js component libraries end-to-end. Would love to help you build out UI features.\\n\\nDo you have 5 minutes to chat next week?\\n\\nBest,\\nSumit"}
+`;
+
+  const user = `Company: ${companyName}\nResume:\n${JSON.stringify(resume)}\n\nJob Description:\n${jobDescription}`;
+  const raw = await complete(system, user, { json: true, temperature: 0.7, maxTokens: 400 });
+  const parsed = extractJson<{ subject: string; body: string }>(raw);
+  return {
+    subject: parsed.subject ?? `Engineering role at ${companyName}`,
+    body: parsed.body ?? "",
+  };
+}
+
+

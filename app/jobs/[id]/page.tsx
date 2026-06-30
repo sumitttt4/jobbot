@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { JobDetail } from "@/components/JobDetail";
 import { getJobWithMatch } from "@/lib/data";
-import { hasGroq } from "@/lib/config";
+import { hasGroq, hasSmtp } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default function JobPage({ params }: { params: { id: string } }) {
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.75} /> Dashboard
         </Link>
-        <JobDetail job={job} canGenerate={hasGroq} />
+        <JobDetail job={job} canGenerate={hasGroq} canSend={hasSmtp} />
       </main>
     </>
   );

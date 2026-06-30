@@ -7,3 +7,9 @@
 export const hasGroq = !!process.env.GROQ_API_KEY;
 
 export const hasJSearch = !!process.env.JSEARCH_API_KEY;
+
+export const hasSmtp = !!(
+  process.env.SMTP_HOST &&
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASS
+);
