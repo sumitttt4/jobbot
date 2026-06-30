@@ -114,6 +114,8 @@ function sample(
       },
       status,
       cover_letter: null,
+      applied_at: null,
+      notes: null,
     },
   };
 }

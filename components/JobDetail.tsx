@@ -15,7 +15,10 @@ import { MatchScore } from "@/components/MatchScore";
 import { formatSalary } from "@/lib/utils";
 import type { JobStatus, JobWithMatch, MatchSkills } from "@/lib/types";
 
-const STATUSES: JobStatus[] = ["new", "viewed", "applied", "saved", "rejected"];
+const STATUSES: JobStatus[] = [
+  "new", "viewed", "saved", "applied", "replied",
+  "interviewing", "offer", "no_reply", "ghosted", "rejected",
+];
 
 function SkillChip({ accent, children }: { accent?: boolean; children: string }) {
   return (
@@ -119,8 +122,8 @@ export function JobDetail({
                   className="rounded-md border border-line bg-white px-2.5 py-1.5 text-sm capitalize text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/20"
                 >
                   {STATUSES.map((s) => (
-                    <option key={s} value={s} className="capitalize">
-                      {s}
+                    <option key={s} value={s}>
+                      {s === "no_reply" ? "No reply" : s === "ghosted" ? "Ghosted" : s.charAt(0).toUpperCase() + s.slice(1)}
                     </option>
                   ))}
                 </select>

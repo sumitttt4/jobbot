@@ -22,6 +22,8 @@ export interface StoredMatch {
   match_skills: MatchSkills | null;
   status: JobStatus;
   cover_letter: string | null;
+  applied_at: string | null;
+  notes: string | null;
 }
 
 export interface DB {

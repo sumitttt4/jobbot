@@ -10,6 +10,12 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
     "./lib/**/*.{ts,tsx}",
   ],
+  // Status badge colors are set dynamically in lib/utils.ts — safelist them.
+  safelist: [
+    "bg-green-50", "text-green-700",
+    "bg-green-100", "text-green-800",
+    "bg-amber-50", "text-amber-700",
+  ],
   theme: {
     extend: {
       colors: {

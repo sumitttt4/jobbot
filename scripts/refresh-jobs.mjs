@@ -175,7 +175,7 @@ async function main() {
     if (db.jobs.find((x) => x.job_id === j.job_id)) continue;
     const job = { ...j, id: j.job_id, created_at: new Date().toISOString() };
     db.jobs.unshift(job);
-    db.matches[job.id] ??= { match_score: null, match_skills: null, status: "new", cover_letter: null };
+    db.matches[job.id] ??= { match_score: null, match_skills: null, status: "new", cover_letter: null, applied_at: null, notes: null };
     added++;
   }
   db.jobs_fetched_at = new Date().toISOString();

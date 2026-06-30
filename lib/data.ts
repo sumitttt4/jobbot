@@ -46,6 +46,8 @@ function withMatch(job: Job, match?: StoredMatch): JobWithMatch {
           match_skills: match.match_skills,
           status: match.status,
           cover_letter: match.cover_letter,
+          applied_at: match.applied_at ?? null,
+          notes: match.notes ?? null,
         }
       : null,
   };
@@ -95,6 +97,8 @@ export function upsertJobs(jobs: Omit<Job, "id" | "created_at">[]): Job[] {
           match_skills: null,
           status: "new",
           cover_letter: null,
+          applied_at: null,
+          notes: null,
         };
       }
     }
@@ -109,6 +113,8 @@ export function setMatchScore(jobId: string, score: number, skills: MatchSkills)
       match_skills: null,
       status: "new" as JobStatus,
       cover_letter: null,
+      applied_at: null,
+      notes: null,
     };
     m.match_score = score;
     m.match_skills = skills;
@@ -116,11 +122,28 @@ export function setMatchScore(jobId: string, score: number, skills: MatchSkills)
   });
 }
 
+const APPLIED_STATUSES: JobStatus[] = ["applied", "replied", "interviewing", "offer", "no_reply", "ghosted"];
+
 export function setStatus(jobId: string, status: JobStatus): boolean {
   let ok = false;
   updateDB((db) => {
     if (db.matches[jobId]) {
       db.matches[jobId].status = status;
+      // Auto-set applied_at when moving to an applied state for the first time
+      if (APPLIED_STATUSES.includes(status) && !db.matches[jobId].applied_at) {
+        db.matches[jobId].applied_at = new Date().toISOString();
+      }
+      ok = true;
+    }
+  });
+  return ok;
+}
+
+export function setNotes(jobId: string, notes: string): boolean {
+  let ok = false;
+  updateDB((db) => {
+    if (db.matches[jobId]) {
+      db.matches[jobId].notes = notes;
       ok = true;
     }
   });
@@ -153,7 +176,7 @@ export function getStats(): Stats {
 
   const matches = Object.values(db.matches);
   const total = db.jobs.length;
-  const applied = matches.filter((m) => m.status === "applied").length;
+  const applied = matches.filter((m) => APPLIED_STATUSES.includes(m.status)).length;
   const saved = matches.filter((m) => m.status === "saved").length;
   const scored = matches.filter((m) => typeof m.match_score === "number");
   const matchRate = scored.length

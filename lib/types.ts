@@ -38,6 +38,11 @@ export type JobStatus =
   | "new"
   | "viewed"
   | "applied"
+  | "replied"
+  | "interviewing"
+  | "offer"
+  | "no_reply"
+  | "ghosted"
   | "saved"
   | "rejected";
 
@@ -85,6 +90,8 @@ export interface JobWithMatch extends Job {
     match_skills: MatchSkills | null;
     status: JobStatus;
     cover_letter: string | null;
+    applied_at: string | null;
+    notes: string | null;
   } | null;
 }
 

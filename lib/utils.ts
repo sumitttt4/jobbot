@@ -31,6 +31,11 @@ const STATUS_STYLES: Record<JobStatus, { label: string; className: string }> = {
   new: { label: "New", className: "border border-line bg-subtle text-muted" },
   viewed: { label: "Viewed", className: "border border-line bg-subtle text-muted" },
   applied: { label: "Applied", className: "border border-transparent bg-accent-weak text-accent" },
+  replied: { label: "Replied", className: "border border-transparent bg-green-50 text-green-700" },
+  interviewing: { label: "Interviewing", className: "border border-transparent bg-amber-50 text-amber-700" },
+  offer: { label: "Offer", className: "border border-transparent bg-green-100 text-green-800" },
+  no_reply: { label: "No reply", className: "border border-line bg-white text-faint" },
+  ghosted: { label: "Ghosted", className: "border border-line bg-subtle text-faint" },
   saved: { label: "Saved", className: "border border-ink/15 bg-white text-ink" },
   rejected: { label: "Rejected", className: "border border-line bg-white text-faint" },
 };
